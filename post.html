@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post Comments</title>
+  </head>
+
+  <style>
+    .container {
+      padding: 28px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    h1 {
+      font-size: 3em;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    p {
+      margin-top: 10px;
+      font-size: 30px;
+      color: rgb(74, 74, 74);
+      max-width: 800px;
+    }
+
+    .tags {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tags span {
+      background-color: rgb(14, 109, 232);
+      padding: 4px 10px;
+      color: white;
+      border-radius: 20px;
+    }
+
+    .commentInput {
+      padding: 6px 10px;
+      font-size: 16px;
+      border: 2px solid rgb(90, 90, 90);
+      border-radius: 4px;
+    }
+
+    .reply {
+      padding: 6px 12px;
+      background-color: rgb(21, 92, 235);
+      border-radius: 4px;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .reply:hover {
+      background-color: rgb(36, 107, 249);
+    }
+
+    .commentContainer {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .commentContainer span {
+      max-width: fit-content;
+      font-size: 20px;
+      background: #f1f1f1;
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+
+    .deleteComment {
+      padding: 6px 12px;
+      background-color: rgb(235, 49, 21);
+      border-radius: 4px;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .homepage {
+      width: fit-content;
+      background-color: #177ae4;
+      text-decoration: none; 
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 4px;
+    }
+
+    .homepage:hover {
+      background-color: #0b61bd;
+    }
+
+    .loading-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .loader {
+      width: 50px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(farthest-side, #ffa516 94%, #0000) top/8px 8px
+          no-repeat,
+        conic-gradient(#0000 30%, #ffa516);
+      -webkit-mask: radial-gradient(
+        farthest-side,
+        #0000 calc(100% - 8px),
+        #000 0
+      );
+      animation: l13 1s infinite linear;
+    }
+    @keyframes l13 {
+      100% {
+        transform: rotate(1turn);
+      }
+    }
+
+    @media screen and (max-width: 700px) {
+      h1 {
+        font-size: 2em;
+      }
+      p {
+        font-size: 20px;
+      }
+    }
+
+    @media screen and (max-width: 400px) {
+      .reply {
+        margin-top: 4px;
+      }
+    }
+  </style>
+
+  <body>
+    <div class="container"></div>
+
+   <script>
+  // Taking search params (ex - ?id=10)
+  const queryString = window.location.search;
+  // Using browser's URLSearchParams API to manipulate query parameters
+  const urlData = new URLSearchParams(queryString);
+  // Extracting id from Params
+  const postId = urlData.get("id");
+  // Validating PostId
+  if (!postId) {
+    document.body.innerHTML = "<h2>Invalid Post ID</h2>";
+    throw new Error("Post ID missing in URL");
+  }
+  // Accessing Container div
+  const pageContainer = document.querySelector(".container");
+  // Intializing an Array to store comments with empty array or already stored comments in local storage
+  let commentList = JSON.parse(localStorage.getItem(`comments_${postId}`)) || [];
+  // To stop JS injection
+  function makeTextSafe(text) {
+    const temp = document.createElement("div");
+    temp.textContent = text;
+    return temp.innerHTML;
+  }
+  // Function to load comments
+  function showComments(commentBox) {
+    commentBox.innerHTML = commentList
+      .map(
+        (comment, index) => `
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span>${makeTextSafe(comment)}</span>
+          <button class="deleteComment" onclick="removeComment(${index})">X</button>
+        </div>
+      `
+      )
+      .join("");
+  }
+  // Removing comment with index
+  function removeComment(index) {
+    commentList.splice(index, 1);
+    localStorage.setItem(`comments_${postId}`, JSON.stringify(commentList));
+    showComments(document.querySelector(".commentContainer"));
+  }
+  // Function to load post data
+  (async function loadPost() {
+    try {
+      pageContainer.innerHTML = `
+        <div class="loading-container">
+          <h2>Loading post...</h2>
+          <div class="loader"></div>
+        </div>
+      `;
+
+      const apiResponse = await fetch(`https://dummyjson.com/posts/${postId}`);
+      const post = await apiResponse.json();
+
+      const tagHTML = post.tags.map(tag => `<span>${tag}</span>`).join("");
+
+      pageContainer.innerHTML = `
+        <a class="homepage" href="index.html">Home</a>
+        <h1>${post.title}</h1>
+        <div class="tags">${tagHTML}</div>
+        <p>${post.body}</p>
+
+        <div>
+          <input type="text" placeholder="Enter your comment" class="commentInput">
+          <button class="reply">Reply</button>
+        </div>
+
+        <p>Comments:</p>
+        <div class="commentContainer"></div>
+      `;
+
+      const commentInput = document.querySelector(".commentInput");
+      const replyButton = document.querySelector(".reply");
+      const commentBox = document.querySelector(".commentContainer");
+
+      showComments(commentBox);
+
+      replyButton.addEventListener("click", () => {
+        const newComment = commentInput.value.trim();
+        if (!newComment) return;
+
+        commentList.push(newComment);
+        localStorage.setItem(`comments_${postId}`, JSON.stringify(commentList));
+
+        showComments(commentBox);
+        commentInput.value = "";
+      });
+
+    } catch (error) {
+      console.error(error);
+      pageContainer.innerHTML = "<h2>Failed to load post</h2>";
+    }
+  })();
+</script>
+
+  </body>
+</html>
