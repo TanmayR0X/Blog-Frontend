@@ -4,6 +4,12 @@
 This is a simple blog application built using **HTML, CSS, and Vanilla JavaScript**.  
 The project fetches blog posts from an external API, displays them in a responsive grid layout, and allows users to view individual posts with a comment system. Comments are stored locally using `localStorage`.
 
+<p align="start">
+  <a href="https://yourusername.github.io/repository-name/" target="_blank">
+    <img src="https://img.shields.io/badge/Live%20Preview-Click%20Here-blue?style=for-the-badge">
+  </a>
+</p>
+
 The project focuses on understanding:
 - API integration
 - DOM manipulation
@@ -13,12 +19,6 @@ The project focuses on understanding:
 
 ---
 
-
-### UI Diagram
- 
-
-
----
 
 ### ✨ Features
 
@@ -64,14 +64,4 @@ The project focuses on understanding:
 
 ---
 
-### 📌 Learning Outcomes
-
-- Understanding async/await with Fetch API  
-- Working with query parameters  
-- Managing browser storage  
-- Building reusable render functions  
-- Handling user input safely  
-- Creating responsive layouts  
-
----
 
