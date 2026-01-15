@@ -8,6 +8,12 @@ let Posts = [];
 // Fetching posts with IIFE FetchPosts()
 (async function FetchPosts() {
   try {
+    container.innerHTML = `
+        <div class="loading-container">
+          <h2 style="font-size:30px ;">Loading posts</h2>
+          <div class="loader"></div>
+        </div>
+      `;
     const response =  await fetch("https://dummyjson.com/posts")
     const data = await response.json();
     data.posts.map((item) => {
